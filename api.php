@@ -32,7 +32,26 @@
     if (isset($_GET['overTimeData10mins'])) {
         $data = array_merge($data,  getOverTimeData10mins());
     }
-
+	
+	// Do not require Auth for the detaunt endpoint, this is dangerous as it's running a sudo command
+	// TODO: shift this to a script that can be run from non sudo
+	if (isset($_GET['detaunt'])) {
+		$disable = intval($_GET['detaunt']);
+		// intval returns the integer value on success, or 0 on failure
+		// if not specified set the default Disable to 300 (5 Minutes)
+		if($disable == 0)
+		{
+			$disable = 300;
+		}
+		if($disable > 0)
+		{
+			exec("sudo pihole disable ".$disable."s");
+		}
+		$data = array_merge($data, Array(
+			"status" => "disabled"
+		));
+	}
+	
     // Auth Required
 
     if (isset($_GET['topItems']) && $auth) {
